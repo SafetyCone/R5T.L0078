@@ -9,9 +9,42 @@ using R5T.T0131;
 
 namespace R5T.L0078.O001
 {
+    /// <summary>
+    /// GitHub client operations on contexts with:
+    /// <list type="bullet">
+    /// <item><see cref="IHasGitHubClient"/></item>
+    /// </list>
+    /// </summary>
     [ValuesMarker]
     public partial interface IGitHubClientContextOperations : IValuesMarker
     {
+        public Task Display_CurrentUser_ToConsole<TContext>(TContext context)
+            where TContext : IHasGitHubClient
+        {
+            return Instances.GitHubClientOperator.Verify_IsWorking(
+                context.GitHubClient);
+        }
+
+        public Func<TContext, Task> Exists_Repository<TContext>(
+            string repositoryOwnerName,
+            string repositoryName,
+            Func<TContext, bool, Task> outputHandler = default)
+            where TContext : IHasGitHubClient
+        {
+            return async context =>
+            {
+                var exists = await Instances.GitHubClientOperator.Exists_Repository(
+                    context.GitHubClient,
+                    repositoryOwnerName,
+                    repositoryName);
+
+                await Instances.FunctionOperator.Run(
+                    context,
+                    exists,
+                    outputHandler);
+            };
+        }
+
         public Func<TContext, Task> Set_GitHubClient<TContext>(
             Task<GitHubClient> gettingGitHubClient)
             where TContext : IWithGitHubClient
@@ -32,10 +65,19 @@ namespace R5T.L0078.O001
                 Task.FromResult(gitHubClient));
         }
 
+        /// <summary>
+        /// Quality-of-life overload for <see cref="Verify_GitHubClient_IsWorking{TContext}(TContext)"/>
+        /// </summary>
         public Task Verify_IsWorking<TContext>(TContext context)
             where TContext : IWithGitHubClient
         {
-            return Instances.ClientOperator.Verify_IsWorking(
+            return this.Verify_GitHubClient_IsWorking(context);
+        }
+
+        public Task Verify_GitHubClient_IsWorking<TContext>(TContext context)
+            where TContext : IWithGitHubClient
+        {
+            return Instances.GitHubClientOperator.Verify_IsWorking(
                 context.GitHubClient);
         }
     }

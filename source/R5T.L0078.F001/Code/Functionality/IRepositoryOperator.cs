@@ -20,7 +20,7 @@ namespace R5T.L0078.F001
             string repositoryName,
             Func<Repository, TOutput> function)
         {
-            var repository = await Instances.ClientOperator.Get_Repository(
+            var repository = await Instances.GitHubClientOperator.Get_Repository(
                 gitHubClient,
                 repositoryOwnerName,
                 repositoryName);
